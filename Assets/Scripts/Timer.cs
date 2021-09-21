@@ -15,17 +15,64 @@ public class Timer : MonoBehaviour
     [SerializeField] private float timeBetweenCallsChangedTimeEvent = 1;
     [SerializeField] private bool startOnAwake = true;
 
-    [SerializeField] private int minTime = 0;
-    [SerializeField] private int maxTime;
-    [SerializeField] private int currentTime;
+    [SerializeField] private float minTime = 0;
+    [SerializeField] private float maxTime = 10;
+    [SerializeField] private float currentTime = 0;
 
-
-    void Start()
+    private void Start()
     {
-        
+        StartTime();
+    }
+    public void StartTime()
+    {
+        StartCoroutine(TimerCor());
+    }
+    public void StopTime()
+    {
+
+    }
+    public void PauseTime()
+    {
+
     }
 
-    // Update is called once per frame
+    public void AddTime()
+    {
+
+    }
+
+    public void TakeAwayTime()
+    {
+
+    }
+
+    private IEnumerator TimerCor()
+    {
+        /*float duration = 3f; // 3 seconds you can change this 
+                             //to whatever you want
+        float normalizedTime = 0;
+        while (normalizedTime <= 1f)
+        {
+            normalizedTime += Time.deltaTime / duration;
+            yield return null;
+        }*/
+
+        for (float time = 0; time <= maxTime;)
+        {
+            currentTime += Time.deltaTime;
+            time += Time.deltaTime;
+            yield return null;
+        }
+        currentTime = maxTime;
+
+
+
+
+        yield break;
+    }
+
+
+
     void Update()
     {
         
