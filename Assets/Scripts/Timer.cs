@@ -5,6 +5,14 @@ using UnityEngine.Events;
 
 public class Timer : MonoBehaviour
 {
+    [SerializeField] private float timeBetweenCallsChangedTimeEvent = 1;
+    [SerializeField] private bool startOnAwake = true;
+    [SerializeField] private bool directionMin = true;
+
+    [SerializeField] private float minTime = 0;
+    [SerializeField] private float maxTime = 10;
+    [SerializeField] private float currentTime = 0;
+
     public UnityEvent startTimeEvent;
     public UnityEvent pauseTimeEvent;
     public UnityEvent stopTimeEvent;
@@ -12,71 +20,76 @@ public class Timer : MonoBehaviour
     public UnityEvent isMaxTimeEvent;
     public UnityEvent changedTimeEvent;
 
-    [SerializeField] private float timeBetweenCallsChangedTimeEvent = 1;
-    [SerializeField] private bool startOnAwake = true;
-
-    [SerializeField] private float minTime = 0;
-    [SerializeField] private float maxTime = 10;
-    [SerializeField] private float currentTime = 0;
+    private Coroutine activeTimerLinkCor = null;
 
     private void Start()
     {
-        StartTime();
+        if(startOnAwake) StartTime();
     }
+
     public void StartTime()
     {
-        StartCoroutine(TimerCor());
+        StopTime();
+        activeTimerLinkCor = StartCoroutine(TimerCor());
     }
+
     public void StopTime()
     {
-
+        StopCoroutine(activeTimerLinkCor);
     }
+
     public void PauseTime()
     {
 
     }
 
-    public void AddTime()
+    public void AddTime(float value)
     {
-
+        if (value < 0) return;
+        currentTime = (currentTime + value) >= maxTime ? maxTime : (currentTime + value);
+        TimeIsMax();
     }
 
-    public void TakeAwayTime()
+    public void TakeAwayTime(float value)
     {
+        if (value < 0) return;
+        currentTime = (currentTime - value) <= minTime ? minTime : (currentTime - value);
+        TimeIsMin();
+    }
 
+
+    public bool TimeIsMin()
+    {
+        if (currentTime == minTime) isMinTimeEvent?.Invoke();
+        return currentTime == minTime;
+    }
+    public bool TimeIsMax()
+    {
+        if (currentTime == maxTime) isMaxTimeEvent?.Invoke();
+        return currentTime == maxTime;
     }
 
     private IEnumerator TimerCor()
     {
-        /*float duration = 3f; // 3 seconds you can change this 
-                             //to whatever you want
-        float normalizedTime = 0;
-        while (normalizedTime <= 1f)
+        while (true)
         {
-            normalizedTime += Time.deltaTime / duration;
-            yield return null;
-        }*/
-
-        for (float time = 0; time <= maxTime;)
-        {
-            currentTime += Time.deltaTime;
-            time += Time.deltaTime;
-            yield return null;
+            if (directionMin)
+            {
+               currentTime = currentTime <= maxTime ? (currentTime + Time.deltaTime) : maxTime;
+               if (TimeIsMax()) yield break;
+            }
+            else
+            {
+                currentTime = currentTime >= minTime ? (currentTime - Time.deltaTime) : minTime;
+                if (TimeIsMin()) yield break;
+            }
+            yield return null;// pause on 1 frame
         }
-        currentTime = maxTime;
-
-
-
-
         yield break;
     }
 
 
-
-    void Update()
-    {
-        
-    }
+    
 
 
 }
